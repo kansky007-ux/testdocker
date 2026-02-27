@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍜 กินอะไรดี? Thai Food Spin!</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700;900&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #E63946;
+    --yellow: #FFD166;
+    --green: #06D6A0;
+    --orange: #FB8500;
+    --bg: #FFF8F0;
+    --dark: #1A1A2E;
+    --pink: #FF6B9D;
+    --blue: #4361EE;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Kanit', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .floaty {
+    position: fixed;
+    font-size: 2rem;
+    animation: floatAround linear infinite;
+    pointer-events: none;
+    opacity: 0.12;
+    z-index: 0;
+  }
+  @keyframes floatAround {
+    0% { transform: translateY(100vh) rotate(0deg); }
+    100% { transform: translateY(-100px) rotate(360deg); }
+  }
+
+  header {
+    background: var(--red);
+    padding: 1.5rem 2rem;
+    text-align: center;
+    border-bottom: 6px solid var(--dark);
+    box-shadow: 0 6px 0 var(--orange);
+    position: relative;
+    z-index: 10;
+  }
+  header h1 {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 900;
+    color: var(--yellow);
+    text-shadow: 4px 4px 0 var(--dark);
+  }
+  header p { color: white; font-size: 1rem; margin-top: 0.3rem; opacity: 0.9; }
+
+  /* NAV TABS */
+  .nav {
+    display: flex;
+    background: var(--dark);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-tab {
+    flex: 1;
+    padding: 0.8rem;
+    text-align: center;
+    cursor: pointer;
+    color: #888;
+    font-weight: 700;
+    font-size: 0.95rem;
+    font-family: 'Kanit', sans-serif;
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    border-bottom: 4px solid transparent;
+  }
+  .nav-tab.active { color: var(--yellow); border-bottom-color: var(--yellow); }
+  .nav-tab:hover { color: white; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── SPIN PAGE ── */
+  .spin-section {
+    background: white;
+    border: 4px solid var(--dark);
+    border-radius: 24px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 8px 8px 0 var(--dark);
+    text-align: center;
+  }
+
+  .category-tabs {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .tab {
+    padding: 0.5rem 1.2rem;
+    border: 3px solid var(--dark);
+    border-radius: 50px;
+    cursor: pointer;
+    font-family: 'Kanit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    background: white;
+    transition: all 0.15s;
+  }
+  .tab:hover { transform: translateY(-2px); }
+  .tab.food.active { background: var(--orange); border-color: var(--orange); color: white; }
+  .tab.drink.active { background: var(--green); border-color: var(--green); color: var(--dark); }
+  .tab.all.active { background: var(--red); border-color: var(--red); color: white; }
+
+  .result-card {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 1.5rem 0;
+  }
+  .food-emoji {
+    font-size: 6rem;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  .food-emoji.spinning { animation: spinEmoji 0.08s linear infinite; }
+  @keyframes spinEmoji {
+    0%   { transform: scale(1) rotate(0deg); }
+    25%  { transform: scale(1.2) rotate(5deg); }
+    50%  { transform: scale(0.9) rotate(-5deg); }
+    75%  { transform: scale(1.1) rotate(3deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  .food-name-th {
+    font-size: clamp(2rem, 7vw, 3.5rem);
+    font-weight: 900;
+    color: var(--dark);
+    text-shadow: 3px 3px 0 var(--yellow);
+    line-height: 1.1;
+  }
+  .food-name-en { font-size: 1rem; color: #888; font-family: 'Sarabun', sans-serif; margin-top: 0.2rem; }
+  .food-tag {
+    display: inline-block;
+    padding: 0.2rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+    border: 2px solid;
+  }
+  .food-tag.food { background: #FFF3E0; color: var(--orange); border-color: var(--orange); }
+  .food-tag.drink { background: #E8F8F5; color: var(--green); border-color: var(--green); }
+
+  .spin-btn {
+    background: var(--red);
+    color: white;
+    border: 4px solid var(--dark);
+    border-radius: 16px;
+    padding: 1rem 3rem;
+    font-family: 'Kanit', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 5px 5px 0 var(--dark);
+    transition: all 0.1s;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+  }
+  .spin-btn:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--dark); }
+  .spin-btn:active { transform: translate(4px, 4px); box-shadow: 1px 1px 0 var(--dark); }
+  .spin-btn::after {
+    content: '';
+    position: absolute; top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.4s;
+  }
+  .spin-btn:hover::after { left: 100%; }
+
+  .add-to-day-btn {
+    background: var(--green);
+    color: var(--dark);
+    border: 3px solid var(--dark);
+    border-radius: 12px;
+    padding: 0.6rem 1.5rem;
+    font-family: 'Kanit', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 var(--dark);
+    margin-top: 1rem;
+    transition: all 0.1s;
+    display: none;
+  }
+  .add-to-day-btn.visible { display: inline-block; }
+  .add-to-day-btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--dark); }
+  .add-to-day-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--dark); }
+
+  /* ── LOG PAGE ── */
+  .daily-section {
+    background: white;
+    border: 4px solid var(--dark);
+    border-radius: 24px;
+    padding: 2rem;
+    box-shadow: 8px 8px 0 var(--dark);
+  }
+  .daily-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .daily-header h2 { font-size: 1.5rem; font-weight: 900; }
+  .clear-btn {
+    background: white;
+    border: 2px solid var(--red);
+    color: var(--red);
+    border-radius: 8px;
+    padding: 0.3rem 0.8rem;
+    font-family: 'Kanit', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .clear-btn:hover { background: var(--red); color: white; }
+  .day-group { margin-bottom: 1.5rem; }
+  .day-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.3rem;
+  }
+  .log-items { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .log-item {
+    background: var(--bg);
+    border: 2px solid var(--dark);
+    border-radius: 50px;
+    padding: 0.4rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .remove-item {
+    cursor: pointer;
+    opacity: 0.4;
+    font-size: 0.75rem;
+    background: none;
+    border: none;
+    font-family: 'Kanit', sans-serif;
+    transition: opacity 0.1s;
+  }
+  .remove-item:hover { opacity: 1; color: var(--red); }
+  .empty-log { text-align: center; color: #ccc; padding: 2rem; font-size: 1rem; }
+  .empty-log span { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+
+  /* ── STATS PAGE ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: white;
+    border: 4px solid var(--dark);
+    border-radius: 20px;
+    padding: 1.2rem;
+    text-align: center;
+    box-shadow: 5px 5px 0 var(--dark);
+  }
+  .stat-card .stat-val {
+    font-size: 2.5rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .stat-card .stat-label { font-size: 0.85rem; color: #888; margin-top: 0.3rem; }
+  .stat-card.red .stat-val { color: var(--red); }
+  .stat-card.green .stat-val { color: var(--green); }
+  .stat-card.orange .stat-val { color: var(--orange); }
+  .stat-card.blue .stat-val { color: var(--blue); }
+
+  .leaderboard {
+    background: white;
+    border: 4px solid var(--dark);
+    border-radius: 24px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 8px 8px 0 var(--dark);
+  }
+  .leaderboard h3 {
+    font-size: 1.2rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid var(--dark);
+  }
+  .lb-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid #eee;
+    animation: popIn 0.3s ease;
+  }
+  .lb-rank {
+    font-size: 1.3rem;
+    font-weight: 900;
+    width: 2rem;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .lb-emoji { font-size: 1.5rem; flex-shrink: 0; }
+  .lb-name { flex: 1; font-weight: 700; }
+  .lb-name small { color: #aaa; font-size: 0.8rem; font-family: 'Sarabun', sans-serif; display: block; }
+  .lb-bars { display: flex; gap: 0.5rem; flex-shrink: 0; }
+  .lb-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border: 2px solid;
+  }
+  .lb-badge.spins { background: #EEF2FF; color: var(--blue); border-color: var(--blue); }
+  .lb-badge.saves { background: #E8F8F5; color: var(--green); border-color: var(--green); }
+
+  /* Bar chart */
+  .bar-section {
+    background: white;
+    border: 4px solid var(--dark);
+    border-radius: 24px;
+    padding: 1.5rem;
+    box-shadow: 8px 8px 0 var(--dark);
+    margin-bottom: 2rem;
+  }
+  .bar-section h3 { font-size: 1.2rem; font-weight: 900; margin-bottom: 1rem; }
+  .bar-row { margin-bottom: 0.7rem; }
+  .bar-label { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.2rem; display: flex; justify-content: space-between; }
+  .bar-track { background: #eee; border-radius: 50px; height: 18px; overflow: hidden; border: 2px solid var(--dark); }
+  .bar-fill {
+    height: 100%;
+    border-radius: 50px;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    min-width: 4px;
+  }
+  .bar-fill.spins { background: var(--blue); }
+  .bar-fill.saves { background: var(--green); }
+
+  /* Activity chart */
+  .activity-chart { display: flex; align-items: flex-end; gap: 0.5rem; height: 80px; margin-top: 1rem; }
+  .act-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+  .act-bar { width: 100%; background: var(--yellow); border: 2px solid var(--dark); border-radius: 6px 6px 0 0; transition: height 0.5s; min-height: 4px; }
+  .act-label { font-size: 0.65rem; color: #888; text-align: center; }
+
+  /* API status badge */
+  .api-status {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 2px solid var(--dark);
+    z-index: 999;
+    font-family: 'Kanit', sans-serif;
+  }
+  .api-status.ok { background: var(--green); color: var(--dark); }
+  .api-status.err { background: var(--red); color: white; }
+
+  .confetti-piece {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    border-radius: 2px;
+    animation: confettiFall 1s ease-out forwards;
+  }
+  @keyframes confettiFall {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(120px) rotate(720deg); opacity: 0; }
+  }
+
+  .loading { color: #aaa; text-align: center; padding: 2rem; font-size: 1rem; }
+  .refresh-btn {
+    background: var(--yellow);
+    border: 2px solid var(--dark);
+    border-radius: 8px;
+    padding: 0.3rem 0.8rem;
+    font-family: 'Kanit', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-weight: 700;
+    box-shadow: 2px 2px 0 var(--dark);
+  }
+  .refresh-btn:hover { transform: translate(-1px,-1px); box-shadow: 3px 3px 0 var(--dark); }
+</style>
+</head>
+<body>
+
+<div class="floaty" style="left:5%;animation-duration:15s;animation-delay:0s;">🍜</div>
+<div class="floaty" style="left:15%;animation-duration:20s;animation-delay:3s;">🌶️</div>
+<div class="floaty" style="left:30%;animation-duration:12s;animation-delay:7s;">🥤</div>
+<div class="floaty" style="left:50%;animation-duration:18s;animation-delay:2s;">🍛</div>
+<div class="floaty" style="left:65%;animation-duration:14s;animation-delay:5s;">🧋</div>
+<div class="floaty" style="left:80%;animation-duration:16s;animation-delay:1s;">🍚</div>
+<div class="floaty" style="left:90%;animation-duration:11s;animation-delay:9s;">🌿</div>
+
+<header>
+  <h1>🍜 กินอะไรดีวะ?</h1>
+  <p>Thai Food Randomizer — หมุนแล้วกิน! 🎰</p>
+</header>
+
+<nav class="nav">
+  <button class="nav-tab active" onclick="showPage('spin', this)">🎲 สุ่ม</button>
+  <button class="nav-tab" onclick="showPage('log', this)">📅 บันทึก</button>
+  <button class="nav-tab" onclick="showPage('stats', this); loadStats();">📊 สถิติ</button>
+</nav>
+
+<!-- ═══ SPIN PAGE ═══ -->
+<div class="page active" id="page-spin">
+<div class="container">
+  <div class="spin-section">
+    <div class="category-tabs">
+      <button class="tab all active" onclick="setCategory('all', this)">🎲 ทั้งหมด</button>
+      <button class="tab food" onclick="setCategory('food', this)">🍜 อาหาร</button>
+      <button class="tab drink" onclick="setCategory('drink', this)">🧋 เครื่องดื่ม</button>
+    </div>
+    <div class="result-card">
+      <span class="food-emoji" id="foodEmoji">🎰</span>
+      <div class="food-name-th" id="foodNameTh">กดสุ่มเลย!</div>
+      <div class="food-name-en" id="foodNameEn">Press spin to get your meal</div>
+      <div id="foodTag"></div>
+    </div>
+    <button class="spin-btn" onclick="spin()" id="spinBtn">🎲 สุ่มเมนู!</button>
+    <br>
+    <button class="add-to-day-btn" id="addBtn" onclick="addToDay()">✅ บันทึกวันนี้</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══ LOG PAGE ═══ -->
+<div class="page" id="page-log">
+<div class="container">
+  <div class="daily-section">
+    <div class="daily-header">
+      <h2>📅 บันทึกการกิน</h2>
+      <button class="refresh-btn" onclick="loadLog()">🔄 รีเฟรช</button>
+    </div>
+    <div id="dailyLog"><div class="loading">⏳ กำลังโหลด...</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ STATS PAGE ═══ -->
+<div class="page" id="page-stats">
+<div class="container">
+  <div id="statsContent"><div class="loading">⏳ กำลังโหลดสถิติ...</div></div>
+</div>
+</div>
+
+<div class="api-status" id="apiStatus">⏳ connecting...</div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+// The API URL — update this to your server IP if needed
+const API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:3001'
+  : `http://${window.location.hostname}:3001`;
+
+// ─── FOOD DATA ───────────────────────────────────────────────────────────────
+const foods = [
+  { id:"krapao_chicken",   th:"กะเพราไก่",           en:"Basil Chicken",              emoji:"🍛", type:"food",  spicy:true  },
+  { id:"krapao_pork",      th:"กะเพราหมู",           en:"Basil Pork",                 emoji:"🍛", type:"food",  spicy:true  },
+  { id:"noodle_wide",      th:"ก๋วยเตี๋ยวเส้นใหญ่",  en:"Wide Rice Noodle Soup",      emoji:"🍜", type:"food",  spicy:false },
+  { id:"noodle_thin",      th:"ก๋วยเตี๋ยวเส้นเล็ก", en:"Thin Rice Noodle Soup",      emoji:"🍜", type:"food",  spicy:false },
+  { id:"moo_dang",         th:"ข้าวหมูแดง",          en:"Red BBQ Pork Rice",          emoji:"🍖", type:"food",  spicy:false },
+  { id:"khao_man_gai",     th:"ข้าวมันไก่",          en:"Hainanese Chicken Rice",     emoji:"🍗", type:"food",  spicy:false },
+  { id:"pad_thai",         th:"ผัดไทย",              en:"Pad Thai",                   emoji:"🍝", type:"food",  spicy:false },
+  { id:"som_tam",          th:"ส้มตำ",               en:"Papaya Salad",               emoji:"🥗", type:"food",  spicy:true  },
+  { id:"tom_yum",          th:"ต้มยำกุ้ง",           en:"Tom Yum Goong",              emoji:"🍲", type:"food",  spicy:true  },
+  { id:"green_curry",      th:"แกงเขียวหวาน",        en:"Green Curry",                emoji:"🍛", type:"food",  spicy:true  },
+  { id:"massaman",         th:"แกงมัสมั่น",          en:"Massaman Curry",             emoji:"🍛", type:"food",  spicy:false },
+  { id:"khao_pad_goong",   th:"ข้าวผัดกุ้ง",         en:"Shrimp Fried Rice",          emoji:"🍚", type:"food",  spicy:false },
+  { id:"larb",             th:"ลาบหมู",              en:"Spicy Pork Salad",           emoji:"🥩", type:"food",  spicy:true  },
+  { id:"satay",            th:"หมูสะเต๊ะ",           en:"Pork Satay",                 emoji:"🍡", type:"food",  spicy:false },
+  { id:"pla_rad_prik",     th:"ปลาราดพริก",          en:"Chili Fish",                 emoji:"🐟", type:"food",  spicy:true  },
+  { id:"khao_tom",         th:"ข้าวต้ม",             en:"Rice Congee",                emoji:"🥣", type:"food",  spicy:false },
+  { id:"moo_kata",         th:"หมูกระทะ",            en:"Thai BBQ Pork Grill",        emoji:"🥓", type:"food",  spicy:false },
+  { id:"khai_jeaw",        th:"ไข่เจียว",            en:"Thai Omelette",              emoji:"🍳", type:"food",  spicy:false },
+  { id:"mango_sticky",     th:"มะม่วงข้าวเหนียว",   en:"Mango Sticky Rice",          emoji:"🥭", type:"food",  spicy:false },
+  { id:"khanom_jeen",      th:"ขนมจีน",             en:"Thai Rice Noodle",           emoji:"🍜", type:"food",  spicy:false },
+  { id:"moo_kratiam",      th:"หมูทอดกระเทียม",     en:"Garlic Fried Pork",          emoji:"🍖", type:"food",  spicy:false },
+  { id:"pad_see_ew",       th:"ผัดซีอิ๊ว",           en:"Stir-fried Soy Sauce Noodles",emoji:"🍝",type:"food",  spicy:false },
+  { id:"rad_na",           th:"ราดหน้า",             en:"Gravy Noodles",              emoji:"🍜", type:"food",  spicy:false },
+  { id:"gai_yang",         th:"ไก่ย่าง",             en:"Grilled Chicken",            emoji:"🍗", type:"food",  spicy:false },
+  { id:"tom_kha",          th:"ต้มข่าไก่",           en:"Galangal Chicken Soup",      emoji:"🍲", type:"food",  spicy:false },
+  { id:"cha_yen",          th:"ชาเย็น",              en:"Thai Iced Tea",              emoji:"🧡", type:"drink", spicy:false },
+  { id:"oliang",           th:"โอเลี้ยง",            en:"Thai Iced Coffee",           emoji:"☕", type:"drink", spicy:false },
+  { id:"coconut_water",    th:"น้ำมะพร้าว",          en:"Coconut Water",              emoji:"🥥", type:"drink", spicy:false },
+  { id:"pandan_juice",     th:"น้ำใบเตย",           en:"Pandan Juice",               emoji:"🍵", type:"drink", spicy:false },
+  { id:"sugarcane_juice",  th:"น้ำอ้อย",            en:"Sugar Cane Juice",           emoji:"🥤", type:"drink", spicy:false },
+  { id:"lemongrass_juice", th:"น้ำตะไคร้",          en:"Lemongrass Juice",           emoji:"🍹", type:"drink", spicy:false },
+  { id:"lime_juice",       th:"น้ำมะนาว",           en:"Lime Juice",                 emoji:"🍋", type:"drink", spicy:false },
+  { id:"fresh_milk",       th:"นมสด",               en:"Fresh Milk",                 emoji:"🥛", type:"drink", spicy:false },
+  { id:"ginger_juice",     th:"น้ำขิง",             en:"Ginger Juice",               emoji:"🫚", type:"drink", spicy:true  },
+  { id:"soda",             th:"เปปซี่/โค้ก",        en:"Soda",                       emoji:"🥤", type:"drink", spicy:false },
+  { id:"herbal_juice",     th:"น้ำสมุนไพรรวม",      en:"Herbal Juice",               emoji:"🌿", type:"drink", spicy:false },
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let currentCategory = 'all';
+let currentItem = null;
+let isSpinning = false;
+
+// ─── API HELPERS ─────────────────────────────────────────────────────────────
+async function apiPost(path, body) {
+  try {
+    const r = await fetch(API + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    return r.ok;
+  } catch { return false; }
+}
+
+async function apiGet(path) {
+  try {
+    const r = await fetch(API + path);
+    return r.ok ? await r.json() : null;
+  } catch { return null; }
+}
+
+async function apiDelete(path) {
+  try {
+    const r = await fetch(API + path, { method: 'DELETE' });
+    return r.ok;
+  } catch { return false; }
+}
+
+// ─── HEALTH CHECK ─────────────────────────────────────────────────────────────
+async function checkHealth() {
+  const result = await apiGet('/api/health');
+  const el = document.getElementById('apiStatus');
+  if (result) { el.textContent = '🟢 DB Online'; el.className = 'api-status ok'; }
+  else         { el.textContent = '🔴 DB Offline'; el.className = 'api-status err'; }
+}
+checkHealth();
+setInterval(checkHealth, 30000);
+
+// ─── NAV ─────────────────────────────────────────────────────────────────────
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  el.classList.add('active');
+  if (name === 'log') loadLog();
+}
+
+// ─── CATEGORY ─────────────────────────────────────────────────────────────────
+function setCategory(cat, el) {
+  currentCategory = cat;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+function getFiltered() {
+  return currentCategory === 'all' ? foods : foods.filter(f => f.type === currentCategory);
+}
+
+// ─── SPIN ─────────────────────────────────────────────────────────────────────
+function spin() {
+  if (isSpinning) return;
+  isSpinning = true;
+  const btn = document.getElementById('spinBtn');
+  btn.textContent = '⏳ กำลังสุ่ม...';
+  btn.style.background = '#888';
+  document.getElementById('addBtn').classList.remove('visible');
+
+  const list = getFiltered();
+  let count = 0;
+  const totalSpins = 18 + Math.floor(Math.random() * 10);
+  const emojiEl = document.getElementById('foodEmoji');
+  const nameEl = document.getElementById('foodNameTh');
+  const enEl = document.getElementById('foodNameEn');
+  emojiEl.classList.add('spinning');
+
+  const interval = setInterval(() => {
+    const r = list[Math.floor(Math.random() * list.length)];
+    emojiEl.textContent = r.emoji;
+    nameEl.textContent = r.th;
+    enEl.textContent = r.en;
+    count++;
+    if (count >= totalSpins) {
+      clearInterval(interval);
+      emojiEl.classList.remove('spinning');
+      currentItem = list[Math.floor(Math.random() * list.length)];
+      emojiEl.textContent = currentItem.emoji;
+      nameEl.textContent = currentItem.th;
+      enEl.textContent = currentItem.en;
+      document.getElementById('foodTag').innerHTML =
+        `<span class="food-tag ${currentItem.type}">${currentItem.type === 'food' ? '🍜 อาหาร' : '🥤 เครื่องดื่ม'}${currentItem.spicy ? ' 🌶️' : ''}</span>`;
+      btn.textContent = '🎲 สุ่มอีกครั้ง!';
+      btn.style.background = 'var(--red)';
+      document.getElementById('addBtn').classList.add('visible');
+      isSpinning = false;
+      spawnConfetti();
+      // Record spin in DB
+      apiPost('/api/spin', { menu_id: currentItem.id, name_th: currentItem.th, name_en: currentItem.en, emoji: currentItem.emoji, type: currentItem.type });
+    }
+  }, 80);
+}
+
+// ─── ADD TO LOG ───────────────────────────────────────────────────────────────
+async function addToDay() {
+  if (!currentItem) return;
+  const now = new Date();
+  const log_date = now.toISOString().split('T')[0];
+  const log_time = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+  const ok = await apiPost('/api/save', { ...currentItem, log_date, log_time });
+  const btn = document.getElementById('addBtn');
+  if (ok) {
+    btn.textContent = '✅ บันทึกแล้ว!';
+    spawnConfetti();
+  } else {
+    btn.textContent = '⚠️ บันทึกไม่ได้ (offline)';
+  }
+  setTimeout(() => { btn.textContent = '✅ บันทึกวันนี้'; }, 1800);
+}
+
+// ─── LOAD LOG ─────────────────────────────────────────────────────────────────
+async function loadLog() {
+  const logEl = document.getElementById('dailyLog');
+  const data = await apiGet('/api/log');
+  if (!data) {
+    logEl.innerHTML = `<div class="empty-log"><span>❌</span>ไม่สามารถโหลดได้<br>เซิร์ฟเวอร์ออฟไลน์อยู่</div>`;
+    return;
+  }
+  const keys = Object.keys(data).sort().reverse();
+  if (keys.length === 0) {
+    logEl.innerHTML = `<div class="empty-log"><span>🍽️</span>ยังไม่มีบันทึกเลย<br>ลองสุ่มแล้วกด "บันทึกวันนี้" ดูสิ!</div>`;
+    return;
+  }
+
+  logEl.innerHTML = keys.map(k => `
+    <div class="day-group">
+      <div class="day-label">${formatDateLabel(k)} (${data[k].length} รายการ)</div>
+      <div class="log-items">
+        ${data[k].map(item => `
+          <div class="log-item" id="log-${item.id}">
+            ${item.emoji} ${item.name_th}
+            <span style="color:#aaa;font-size:0.75rem">${item.log_time}</span>
+            <button class="remove-item" onclick="removeItem(${item.id})">✕</button>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+async function removeItem(id) {
+  const el = document.getElementById('log-' + id);
+  if (el) el.style.opacity = '0.4';
+  await apiDelete('/api/log/' + id);
+  loadLog();
+}
+
+function formatDateLabel(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.round((today - d) / 86400000);
+  const label = d.toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long' });
+  if (diff === 0) return `📅 วันนี้ — ${label}`;
+  if (diff === 1) return `⬅️ เมื่อวาน — ${label}`;
+  return `🗓️ ${label}`;
+}
+
+// ─── LOAD STATS ───────────────────────────────────────────────────────────────
+async function loadStats() {
+  const el = document.getElementById('statsContent');
+  el.innerHTML = '<div class="loading">⏳ กำลังโหลดสถิติ...</div>';
+  const data = await apiGet('/api/stats');
+  if (!data) {
+    el.innerHTML = `<div class="loading">❌ โหลดไม่ได้ — เซิร์ฟเวอร์ออฟไลน์</div>`;
+    return;
+  }
+
+  const t = data.totals || {};
+  const maxSpins = Math.max(...data.stats.map(s => s.spins), 1);
+  const maxSaves = Math.max(...data.stats.map(s => s.saves), 1);
+  const maxAct = Math.max(...(data.daily.map(d => d.count)), 1);
+
+  // Activity last 7 days
+  const last7 = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.toISOString().split('T')[0];
+    const found = data.daily.find(x => x.log_date === key);
+    last7.push({ date: key, count: found ? found.count : 0, label: d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }) });
+  }
+
+  el.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card red"><div class="stat-val">${t.total_spins || 0}</div><div class="stat-label">🎲 ครั้งที่สุ่ม</div></div>
+      <div class="stat-card green"><div class="stat-val">${t.total_saves || 0}</div><div class="stat-label">✅ ครั้งที่บันทึก</div></div>
+      <div class="stat-card orange"><div class="stat-val">${t.unique_menus || 0}</div><div class="stat-label">🍜 เมนูที่เคยสุ่ม</div></div>
+      <div class="stat-card blue"><div class="stat-val">${foods.length}</div><div class="stat-label">📋 เมนูทั้งหมด</div></div>
+    </div>
+
+    <div class="bar-section">
+      <h3>📅 7 วันที่ผ่านมา</h3>
+      <div class="activity-chart">
+        ${last7.map(d => `
+          <div class="act-bar-wrap">
+            <div class="act-bar" style="height:${Math.max(4, (d.count / maxAct) * 70)}px" title="${d.count} รายการ"></div>
+            <div class="act-label">${d.label}<br><b>${d.count}</b></div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="leaderboard">
+      <h3>🏆 เมนูยอดนิยม — อาหาร</h3>
+      ${data.topFood.length === 0 ? '<p style="color:#aaa;text-align:center;padding:1rem">ยังไม่มีข้อมูล</p>' :
+        data.topFood.map((item, i) => lbRow(item, i)).join('')}
+    </div>
+
+    <div class="leaderboard">
+      <h3>🥤 เมนูยอดนิยม — เครื่องดื่ม</h3>
+      ${data.topDrink.length === 0 ? '<p style="color:#aaa;text-align:center;padding:1rem">ยังไม่มีข้อมูล</p>' :
+        data.topDrink.map((item, i) => lbRow(item, i)).join('')}
+    </div>
+
+    <div class="bar-section">
+      <h3>📊 Top 10 เมนูที่สุ่มบ่อยที่สุด</h3>
+      ${data.stats.slice(0, 10).map(item => `
+        <div class="bar-row">
+          <div class="bar-label"><span>${item.emoji} ${item.name_th}</span><span>${item.spins} ครั้ง</span></div>
+          <div class="bar-track"><div class="bar-fill spins" style="width:${(item.spins/maxSpins)*100}%"></div></div>
+        </div>
+      `).join('') || '<p style="color:#aaa;text-align:center;padding:1rem">ยังไม่มีข้อมูล</p>'}
+    </div>
+
+    <div class="bar-section">
+      <h3>💾 Top 10 เมนูที่บันทึกบ่อยที่สุด</h3>
+      ${data.stats.slice(0, 10).sort((a,b) => b.saves - a.saves).map(item => `
+        <div class="bar-row">
+          <div class="bar-label"><span>${item.emoji} ${item.name_th}</span><span>${item.saves} ครั้ง</span></div>
+          <div class="bar-track"><div class="bar-fill saves" style="width:${(item.saves/maxSaves)*100}%"></div></div>
+        </div>
+      `).join('') || '<p style="color:#aaa;text-align:center;padding:1rem">ยังไม่มีข้อมูล</p>'}
+    </div>
+  `;
+}
+
+const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+function lbRow(item, i) {
+  return `<div class="lb-row">
+    <div class="lb-rank">${medals[i] || (i+1)}</div>
+    <div class="lb-emoji">${item.emoji}</div>
+    <div class="lb-name">${item.name_th}<small>${item.name_en}</small></div>
+    <div class="lb-bars">
+      <span class="lb-badge spins">🎲 ${item.spins}</span>
+      <span class="lb-badge saves">✅ ${item.saves}</span>
+    </div>
+  </div>`;
+}
+
+// ─── CONFETTI ─────────────────────────────────────────────────────────────────
+function spawnConfetti() {
+  const colors = ['#E63946','#FFD166','#06D6A0','#FB8500','#FF6B9D'];
+  for (let i = 0; i < 20; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.cssText = `left:${30+Math.random()*40}%;top:40%;background:${colors[Math.floor(Math.random()*colors.length)]};width:${6+Math.random()*10}px;height:${6+Math.random()*10}px;animation-delay:${Math.random()*0.3}s;animation-duration:${0.8+Math.random()*0.5}s;`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1500);
+  }
+}
+
+// Load log on start
+loadLog();
+</script>
+</body>
+</html>
