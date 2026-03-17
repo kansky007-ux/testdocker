@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thai-menu-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: thai-menu-frontend
+  template:
+    metadata:
+      labels:
+        app: thai-menu-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: thai-menu-frontend:1.0
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
